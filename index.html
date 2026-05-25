@@ -617,8 +617,10 @@ const OPEN_PIN_ENC  = btoa('4321');   // '1234' reversed
 const ADMIN_PIN_ENC = btoa('9999');   // '9999' reversed
 function pinValid(input, enc){ return btoa(input.split('').reverse().join(''))===enc; }
 const SKUS = [
-  // TODO: Add Hypha Vending products here
-  // Format: {id:1, name:'Product Name', price:0.00, img:'data:image/jpeg;base64,...'}
+  {id:1, name:'Banana Cake',        price:2.00, img:'data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyMDAgMjAwJz48cmVjdCB3aWR0aD0nMjAwJyBoZWlnaHQ9JzIwMCcgZmlsbD0nIzJhMWYwZScvPjx0ZXh0IHg9JzEwMCcgeT0nMTQwJyBmb250LXNpemU9JzkwJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJz7wn42wPC90ZXh0Pjwvc3ZnPg=='},
+  {id:2, name:'Curry Puff',         price:2.00, img:'data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyMDAgMjAwJz48cmVjdCB3aWR0aD0nMjAwJyBoZWlnaHQ9JzIwMCcgZmlsbD0nIzFmMWEwYScvPjx0ZXh0IHg9JzEwMCcgeT0nMTQwJyBmb250LXNpemU9JzkwJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJz7wn6WQPC90ZXh0Pjwvc3ZnPg=='},
+  {id:3, name:'Butter Shiopan',     price:2.00, img:'data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyMDAgMjAwJz48cmVjdCB3aWR0aD0nMjAwJyBoZWlnaHQ9JzIwMCcgZmlsbD0nIzFhMTUwOCcvPjx0ZXh0IHg9JzEwMCcgeT0nMTQwJyBmb250LXNpemU9JzkwJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJz7wn42ePC90ZXh0Pjwvc3ZnPg=='},
+  {id:4, name:'Drinks',             price:2.00, img:'data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyMDAgMjAwJz48cmVjdCB3aWR0aD0nMjAwJyBoZWlnaHQ9JzIwMCcgZmlsbD0nIzBhMTUyMCcvPjx0ZXh0IHg9JzEwMCcgeT0nMTQwJyBmb250LXNpemU9JzkwJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJz7wn6WkPC90ZXh0Pjwvc3ZnPg=='}
 ];
 
 // ============ STATE ============
