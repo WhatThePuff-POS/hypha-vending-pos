@@ -9,41 +9,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="HV POS">
 <link rel="manifest" href="manifest.json">
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, serverTimestamp, doc, updateDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-  const cfg = {
-    apiKey:"REPLACE_WITH_HV_API_KEY",
-    authDomain:"REPLACE_WITH_HV_PROJECT_ID.firebaseapp.com",
-    projectId:"REPLACE_WITH_HV_PROJECT_ID",
-    storageBucket:"REPLACE_WITH_HV_PROJECT_ID.firebasestorage.app",
-    messagingSenderId:"REPLACE_WITH_HV_SENDER_ID",
-    appId:"REPLACE_WITH_HV_APP_ID"
-  };
-  const app = initializeApp(cfg);
-  const db = getFirestore(app);
-  window._db = db;
-  window._addDoc = addDoc;
-  window._collection = collection;
-  window._serverTimestamp = serverTimestamp;
-  window._doc = doc;
-  window._updateDoc = updateDoc;
-  window._fbReady = true;
-  setTimeout(()=>{ const d=document.getElementById('sync-dot'); if(d) d.className='sync-dot synced'; },0);
-
-  window._loadTodayTxns = async function(dateStr, cb){
-    try{
-      const q = query(collection(db,'transactions'), where('date','==',dateStr));
-      const snap = await getDocs(q);
-      const txns=[];
-      snap.forEach(d=>{
-        const data=d.data();
-        if(!data.voided) txns.push({_firebaseId:d.id, id:data.txnId, ...data});
-      });
-      cb(null, txns);
-    } catch(e){ cb(e,[]); }
-  };
-</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:#1a1a1a;font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden}
@@ -117,9 +82,9 @@ html,body{height:100%;background:#1a1a1a;font-family:'Segoe UI',system-ui,sans-s
 .admin-cancel:hover{color:var(--text2)}
 
 /* ---- MAIN APP ---- */
-.app{display:flex;height:100vh;width:100vw}
+.app{display:flex;height:100vh;height:100svh;width:100vw}
 .cashier-panel{flex:1.4;display:flex;flex-direction:column;border-right:1px solid var(--border);min-width:0}
-.order-panel{flex:1;display:flex;flex-direction:column;min-width:0;max-width:360px;overflow:hidden}
+.order-panel{flex:1;display:flex;flex-direction:column;min-width:0;max-width:360px}
 
 /* Topbar */
 .topbar{
@@ -135,9 +100,6 @@ html,body{height:100%;background:#1a1a1a;font-family:'Segoe UI',system-ui,sans-s
 }
 .outlet-display:hover{border-color:var(--amber-dim);color:var(--amber-light)}
 .topbar-spacer{flex:1}
-.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background 0.3s}
-.sync-dot.synced{background:var(--green)}
-.sync-dot.syncing{background:var(--amber);animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 .topbar-time{font-family:monospace;font-size:12px;color:var(--text2);white-space:nowrap}
 .nav-btns{display:flex;gap:5px}
@@ -207,7 +169,7 @@ html,body{height:100%;background:#1a1a1a;font-family:'Segoe UI',system-ui,sans-s
 .disc-badge:hover,.disc-badge.active{background:var(--amber);color:#1a1a1a;border-color:var(--amber);font-weight:700}
 .disc-remove{font-size:11px;color:var(--text3);cursor:pointer;padding:3px 5px}
 .disc-remove:hover{color:var(--red)}
-.totals-area{padding:10px 14px;border-top:1px solid var(--border);flex-shrink:0}
+.totals-area{padding:10px 14px calc(10px + env(safe-area-inset-bottom)) 14px;border-top:1px solid var(--border);flex-shrink:0}
 .total-row{display:flex;justify-content:space-between;margin-bottom:4px}
 .total-row .lbl{font-size:12px;color:var(--text2)}
 .total-row .val{font-size:12px;font-family:monospace;color:var(--text2)}
@@ -295,7 +257,7 @@ html,body{height:100%;background:#1a1a1a;font-family:'Segoe UI',system-ui,sans-s
   .sku-name{font-size:14px}
   .sku-price{font-size:13px}
   .topbar{padding:0 10px;gap:8px}
-  .order-panel{max-width:300px;overflow:hidden}
+  .order-panel{max-width:300px}
 }
 /* MOBILE / small tablet portrait */
 @media(max-width:700px){
@@ -466,8 +428,7 @@ html,body{height:100%;background:#1a1a1a;font-family:'Segoe UI',system-ui,sans-s
 
       <span class="topbar-stats" id="topbar-stats" onclick="unlockStats()" style="cursor:pointer">🔒 Sales</span>
       <span class="topbar-spacer"></span>
-      <div class="sync-dot" id="sync-dot"></div>
-      <span class="topbar-time" id="clock"></span>
+<span class="topbar-time" id="clock"></span>
       <div class="nav-btns">
         
         <button class="nav-btn" onclick="openXReport()">X-Report</button>
@@ -744,20 +705,6 @@ function checkPin(){
     updateTopbarStats();
     restoreFromSession(); // reload today's txns if browser crashed
     if('wakeLock' in navigator) navigator.wakeLock.request('screen').then(wl=>window._wakeLock=wl).catch(()=>{});
-    if(window._loadTodayTxns){
-      const today=new Date().toLocaleDateString('en-SG',{day:'2-digit',month:'short',year:'numeric'});
-      window._loadTodayTxns(today,function(err,txns){
-        if(!err&&txns.length){
-          transactions=txns;
-          txns.forEach(t=>{
-            const m=(t.txnId||t.id||'').match(/TXN(\d+)/);
-            if(m) txnCounter=Math.max(txnCounter,parseInt(m[1]));
-          });
-          updateTopbarStats();
-          showToast('🔄','Restored '+txns.length+' transaction(s) from today');
-        }
-      });
-    }
   } else {
     document.getElementById('pin-error').textContent='Incorrect PIN. Try again.';
     pinEntry='';
@@ -842,34 +789,6 @@ function manualOpenDrawer(){
   showToast('💰','Cash drawer opened');
 }
 
-// ============ SYNC ============
-function setSyncStatus(s){
-  const d=document.getElementById('sync-dot');
-  d.className='sync-dot'+(s==='synced'?' synced':s==='syncing'?' syncing':'');
-}
-
-// ============ FIREBASE ============
-async function saveToCloud(txn){
-  setSyncStatus('syncing');
-  try{
-    if(!window._fbReady) throw new Error('FB not ready');
-    const ref = await window._addDoc(window._collection(window._db,'transactions'),{
-      txnId:txn.id, date:txn.date, time:txn.time, hour:txn.hour,
-      outlet:txn.outlet, items:txn.items, subtotal:txn.subtotal,
-      discount:txn.discount, total:txn.total, payments:txn.payments,
-      discountType:txn.discountType, timestamp:txn.timestamp,
-      voided:false, createdAt:window._serverTimestamp()
-    });
-    txn.firebaseId=ref.id;
-    setSyncStatus('synced');
-  } catch(e){
-    setSyncStatus('');
-    const local=JSON.parse(localStorage.getItem('hv_txns')||'[]');
-    local.push(txn);
-    localStorage.setItem('hv_txns',JSON.stringify(local));
-    showToast('⚠️','Offline — saved locally');
-  }
-}
 
 // ============ SKU GRID ============
 function renderSKUs(){
@@ -1044,8 +963,6 @@ function endTransaction(payments,sundry){
   };
   transactions.push(txn);
   saveToSession(txn); // crash-safe local backup
-  
-  saveToCloud(txn);
   closePayment();
   clearCart();
   updateTopbarStats();
@@ -1177,28 +1094,6 @@ document.addEventListener('visibilitychange',()=>{
   }
 });
 
-// ============ OFFLINE SYNC ============
-window.addEventListener('online', async function(){
-  const queued=JSON.parse(localStorage.getItem('hv_txns')||'[]');
-  if(!queued.length) return;
-  showToast('📶','Syncing '+queued.length+' offline transaction(s)…');
-  const failed=[];
-  for(const txn of queued){
-    try{
-      if(!window._fbReady) throw new Error('not ready');
-      await window._addDoc(window._collection(window._db,'transactions'),{
-        txnId:txn.id, date:txn.date, time:txn.time, hour:txn.hour,
-        outlet:txn.outlet, items:txn.items, subtotal:txn.subtotal,
-        discount:txn.discount, total:txn.total, payments:txn.payments,
-        discountType:txn.discountType, timestamp:txn.timestamp,
-        voided:false, createdAt:window._serverTimestamp()
-      });
-    } catch(e){ failed.push(txn); }
-  }
-  localStorage.setItem('hv_txns',JSON.stringify(failed));
-  setSyncStatus(failed.length?'':'synced');
-  showToast(failed.length?'⚠️':'✅', failed.length?failed.length+' transaction(s) still pending':'All transactions synced');
-});
 </script>
 </body>
 </html>
