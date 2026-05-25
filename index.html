@@ -679,6 +679,34 @@ let splitPayments=[], remainingDue=0;
 let currentVendor=null;
 
 let currentOutlet='Hypha Vending';
+// ============ SESSION PERSISTENCE (crash recovery) ============
+function _todayStr(){return new Date().toLocaleDateString('en-SG',{day:'2-digit',month:'short',year:'numeric'});}
+function saveToSession(txn){
+  const key='hv_session';
+  const s=JSON.parse(localStorage.getItem(key)||'{"date":"","txns":[]}');
+  if(s.date!==_todayStr()){s.date=_todayStr();s.txns=[];}
+  // update existing or append
+  const idx=s.txns.findIndex(t=>t.id===txn.id);
+  if(idx>=0) s.txns[idx]=txn; else s.txns.push(txn);
+  localStorage.setItem(key,JSON.stringify(s));
+}
+function restoreFromSession(){
+  const key='hv_session';
+  const s=JSON.parse(localStorage.getItem(key)||'{"date":"","txns":[]}');
+  if(s.date!==_todayStr()||!s.txns.length) return false;
+  transactions=s.txns;
+  transactions.forEach(t=>{
+    const m=(t.txnId||t.id||'').match(/TXN(\d+)/);
+    if(m) txnCounter=Math.max(txnCounter,parseInt(m[1]));
+  });
+  updateTopbarStats();
+  showToast('🔄','Restored '+transactions.length+' transaction(s) from today');
+  return true;
+}
+function clearSession(){
+  localStorage.removeItem('hv_session');
+  localStorage.removeItem('hv_txns');
+}
 let adminCallback=null;
 let adminMode='report';
 let statsUnlocked=false;
@@ -706,6 +734,7 @@ function checkPin(){
     localStorage.setItem('hv_outlet',currentOutlet);
     updateTxnDisplay();
     updateTopbarStats();
+    restoreFromSession(); // reload today's txns if browser crashed
     if('wakeLock' in navigator) navigator.wakeLock.request('screen').then(wl=>window._wakeLock=wl).catch(()=>{});
     if(window._loadTodayTxns){
       const today=new Date().toLocaleDateString('en-SG',{day:'2-digit',month:'short',year:'numeric'});
@@ -1006,6 +1035,7 @@ function endTransaction(payments,sundry){
     timestamp:now.toISOString()
   };
   transactions.push(txn);
+  saveToSession(txn); // crash-safe local backup
   
   saveToCloud(txn);
   closePayment();
@@ -1103,7 +1133,8 @@ function buildReportHTML(type,now,isZ,d){
     </div>`;
 }
 function reopenTerminal(){
-  transactions=[];txnCounter=0;splitPayments=[];lastReceipt=null;
+  clearSession(); // wipe persisted session for new day
+  transactions=[];txnCounter=0;splitPayments=[];
   statsUnlocked=false;
   document.getElementById('terminal-closed').classList.remove('open');
   document.getElementById('login-screen').classList.remove('hidden');
