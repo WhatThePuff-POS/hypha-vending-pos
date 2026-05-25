@@ -150,11 +150,12 @@ html,body{height:100%;background:#1a1a1a;font-family:'Segoe UI',system-ui,sans-s
 .nav-btn.danger:hover{background:var(--red-bg)}
 
 /* SKU grid */
-.sku-area{
-  flex:1;padding:10px;
-  display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,1fr);
-  gap:8px;overflow:hidden;min-height:0;
-}
+.sku-area{flex:1;padding:10px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;overflow-y:auto;min-height:0;align-content:start;}
+.vendor-subheader{display:flex;align-items:center;gap:10px;padding:7px 10px;border-bottom:1px solid var(--border);flex-shrink:0}
+.back-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text2);padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;touch-action:manipulation;transition:all 0.1s}
+.back-btn:hover{border-color:var(--amber-dim);color:var(--amber-light)}
+.vendor-subname{font-size:14px;font-weight:700;color:var(--amber);flex:1}
+.order-item-vendor{font-size:10px;color:var(--text3);margin-top:1px}
 .sku-btn-custom{border-style:dashed!important;justify-content:center!important;gap:4px}
 .sku-btn-custom .sku-custom-icon{font-size:28px;color:var(--text3);line-height:1}
 .sku-btn-custom .sku-price{color:var(--text3)!important}
@@ -487,6 +488,10 @@ html,body{height:100%;background:#1a1a1a;font-family:'Segoe UI',system-ui,sans-s
         <button class="nav-btn danger" onclick="openZReport()">Z-Report</button>
       </div>
     </div>
+    <div class="vendor-subheader" id="vendor-subheader" style="display:none">
+      <button class="back-btn" ontouchstart="event.preventDefault();backToVendors()" onclick="backToVendors()">← All Vendors</button>
+      <span class="vendor-subname" id="vendor-subname"></span>
+    </div>
     <div class="sku-area" id="sku-area"></div>
   </div>
 
@@ -616,16 +621,92 @@ html,body{height:100%;background:#1a1a1a;font-family:'Segoe UI',system-ui,sans-s
 const OPEN_PIN_ENC  = btoa('4321');   // '1234' reversed
 const ADMIN_PIN_ENC = btoa('9999');   // '9999' reversed
 function pinValid(input, enc){ return btoa(input.split('').reverse().join(''))===enc; }
-const SKUS = [
-  {id:1, name:'Banana Cake',        price:2.00, img:'data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyMDAgMjAwJz48cmVjdCB3aWR0aD0nMjAwJyBoZWlnaHQ9JzIwMCcgZmlsbD0nIzJhMWYwZScvPjx0ZXh0IHg9JzEwMCcgeT0nMTQwJyBmb250LXNpemU9JzkwJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJz7wn42wPC90ZXh0Pjwvc3ZnPg=='},
-  {id:2, name:'Curry Puff',         price:2.00, img:'data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyMDAgMjAwJz48cmVjdCB3aWR0aD0nMjAwJyBoZWlnaHQ9JzIwMCcgZmlsbD0nIzFmMWEwYScvPjx0ZXh0IHg9JzEwMCcgeT0nMTQwJyBmb250LXNpemU9JzkwJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJz7wn6WQPC90ZXh0Pjwvc3ZnPg=='},
-  {id:3, name:'Butter Shiopan',     price:2.00, img:'data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyMDAgMjAwJz48cmVjdCB3aWR0aD0nMjAwJyBoZWlnaHQ9JzIwMCcgZmlsbD0nIzFhMTUwOCcvPjx0ZXh0IHg9JzEwMCcgeT0nMTQwJyBmb250LXNpemU9JzkwJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJz7wn42ePC90ZXh0Pjwvc3ZnPg=='},
-  {id:4, name:'Drinks',             price:2.00, img:'data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyMDAgMjAwJz48cmVjdCB3aWR0aD0nMjAwJyBoZWlnaHQ9JzIwMCcgZmlsbD0nIzBhMTUyMCcvPjx0ZXh0IHg9JzEwMCcgeT0nMTQwJyBmb250LXNpemU9JzkwJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJz7wn6WkPC90ZXh0Pjwvc3ZnPg=='}
+const VENDORS = [
+  {id:1, name:'Panna Cotta by Rohmini', emoji:'🍮', skus:[
+    {id:101, name:'Classic Italian', price:6.50, emoji:'🍮'},
+    {id:102, name:'Black Forest',    price:6.50, emoji:'🍮'},
+    {id:103, name:'Jongkong',        price:6.50, emoji:'🍮'},
+    {id:104, name:'Tarik',           price:6.50, emoji:'🍮'},
+    {id:105, name:'White Choc',      price:6.50, emoji:'🍮'},
+  ]},
+  {id:2, name:'Butter Town', emoji:'🧈', skus:[
+    {id:201, name:'OG',                              price:12.00, emoji:'🍞'},
+    {id:202, name:'Garlic Cheese',                   price:8.70,  emoji:'🧄'},
+    {id:203, name:'Lemon Glazed',                    price:8.10,  emoji:'🍋'},
+    {id:204, name:'Azuki Mochi',                     price:9.90,  emoji:'🍡'},
+    {id:205, name:'Cinnamon Cream & Au Choc',        price:12.00, emoji:'🍫'},
+    {id:206, name:'Kaya',                            price:8.70,  emoji:'🥥'},
+    {id:207, name:'Truffle Mushroom Cheese',         price:12.00, emoji:'🍄'},
+    {id:208, name:'Pistachio White Choc & Au Choc',  price:12.60, emoji:'🌰'},
+  ]},
+  {id:3, name:'Whatthepuff!!', emoji:'🥐', skus:[
+    {id:301, name:'Original',     price:2.30, emoji:'🥐'},
+    {id:302, name:'Cheesy Curry', price:2.85, emoji:'🥐'},
+    {id:303, name:'Mix Box of 3', price:7.99, emoji:'📦'},
+  ]},
+  {id:4, name:'Two Bakes', emoji:'🎂', skus:[
+    {id:401, name:'Huat Cake Blind Box', price:8.00, emoji:'🎂'},
+  ]},
+  {id:5, name:'Hiap Joo', emoji:'🍞', skus:[
+    {id:501, name:'Banana Cake',           price:9.00, emoji:'🍌'},
+    {id:502, name:'Butter Cake (Thu–Fri)', price:9.90, emoji:'🧈'},
+    {id:503, name:'Coffee Cake (Thu–Fri)', price:9.90, emoji:'☕'},
+  ]},
+  {id:6, name:'Auntie Peng', emoji:'🥧', skus:[
+    {id:601, name:'Banana Pie', price:4.50, emoji:'🥧'},
+  ]},
+  {id:7, name:'Moon Juice Kombucha', emoji:'🫧', skus:[
+    {id:701, name:'Love Potion (Raspberry + Rose)',       price:8.00, emoji:'❤️'},
+    {id:702, name:'Earl Grey Lavender',                   price:8.00, emoji:'💜'},
+    {id:703, name:'Big Sur (Blueberry + Blue Spirulina)', price:8.00, emoji:'🫐'},
+    {id:704, name:'Hey Tony! (Strawberry + Mint)',        price:8.00, emoji:'🍓'},
+    {id:705, name:'Moonpie (Passionfruit)',                price:8.00, emoji:'🌙'},
+    {id:706, name:'Orange Sunshine (Pineapple + Orange)', price:8.00, emoji:'🍊'},
+  ]},
+  {id:8, name:'Daily Ground', emoji:'🥗', skus:[
+    {id:801, name:'Spinach Bowl Salad',        price:9.90, emoji:'🥗'},
+    {id:802, name:'Mesclun Mix Salad',         price:9.90, emoji:'🥗'},
+    {id:803, name:'Mix Greens Bowl Salad',     price:9.90, emoji:'🥗'},
+    {id:804, name:'Grilled Greens (Broccoli)', price:4.00, emoji:'🥦'},
+    {id:805, name:'Grilled Greens (Pumpkin)',  price:6.00, emoji:'🎃'},
+    {id:806, name:'Proteins (Chicken)',        price:6.00, emoji:'🍗'},
+    {id:807, name:'Proteins (Chick Pea)',      price:1.00, emoji:'🫘'},
+    {id:808, name:'Mustard Honey Sauce',       price:1.00, emoji:'🍯'},
+    {id:809, name:'Citrus Balsamic Sauce',     price:1.00, emoji:'🍋'},
+    {id:810, name:'Raspberry Goddess Sauce',   price:1.00, emoji:'🍒'},
+  ]},
+  {id:9, name:'Simply Paranakan', emoji:'🍛', skus:[
+    {id:901, name:'Blue Pea Rice',       price:2.00,  emoji:'💙'},
+    {id:902, name:'Tumeric Rice',        price:2.00,  emoji:'🌾'},
+    {id:903, name:'Chap Chye Veg',       price:3.00,  emoji:'🥬'},
+    {id:904, name:'Sayur Lodeh',         price:3.00,  emoji:'🍲'},
+    {id:905, name:'Chicken Buah Keluah', price:6.00,  emoji:'🍗'},
+    {id:906, name:'Assam Fish',          price:6.00,  emoji:'🐟'},
+    {id:907, name:'Beef Rendang',        price:8.00,  emoji:'🥩'},
+    {id:908, name:'Mutton Rendang',      price:8.00,  emoji:'🍖'},
+    {id:909, name:'Bento A',             price:16.80, emoji:'🍱'},
+    {id:910, name:'Bento B',             price:16.80, emoji:'🍱'},
+    {id:911, name:'Bento C',             price:18.80, emoji:'🍱'},
+    {id:912, name:'Bento D',             price:18.80, emoji:'🍱'},
+  ]},
+  {id:10, name:'Woobbee', emoji:'🧋', skus:[
+    {id:1001, name:'W1 Herbal Mint Milk Tea',    price:5.60, emoji:'🧋'},
+    {id:1002, name:'W1 Passion Green Tea',        price:5.30, emoji:'🍵'},
+    {id:1003, name:'W2 Herbal Mint Green Tea',    price:5.60, emoji:'🍵'},
+    {id:1004, name:'W2 Pink Grapefruit Milk Tea', price:5.30, emoji:'🧋'},
+    {id:1005, name:'W2 Honey Mint Green Tea',     price:5.30, emoji:'🍵'},
+    {id:1006, name:'W3 Strawberry Green Tea',     price:5.30, emoji:'🍓'},
+    {id:1007, name:'W3 Honey Milk Tea',           price:5.60, emoji:'🧋'},
+    {id:1008, name:'W4 Double Choc Milk Tea',     price:5.60, emoji:'🍫'},
+    {id:1009, name:'W4 Guava Plum Green Tea',     price:5.30, emoji:'🍵'},
+  ]},
 ];
+function getSKUById(id){for(const v of VENDORS){const s=v.skus.find(s=>s.id===id);if(s)return Object.assign({},s,{vendor:v.name,vendorId:v.id});}return null;}
 
 // ============ STATE ============
 let cart={}, seniorDiscount=false, transactions=[], txnCounter=0;
 let splitPayments=[], remainingDue=0, selectedPayMethod=null, cashGiven=null;
+let currentVendor=null;
 let lastReceipt=null;
 let currentOutlet='Hypha Vending';
 let adminCallback=null;
@@ -785,21 +866,49 @@ async function saveToCloud(txn){
 
 // ============ SKU GRID ============
 function renderSKUs(){
-  document.getElementById('sku-area').innerHTML=SKUS.map(s=>{
-    const qty=cart[s.id]?.qty||0;
-    return `<div class="sku-btn${qty>0?' in-cart':''}" onclick="addToCart(${s.id})">
-      ${qty>0?`<div class="sku-qty-badge">${qty}</div>`:''}
-      <div class="sku-img-wrap"><img class="sku-img" src="${s.img}" alt="${s.name}" loading="lazy"></div>
-      <div class="sku-name">${s.name}</div>
-      <div class="sku-price">${fmt(s.price)}</div>
+  const area=document.getElementById('sku-area');
+  const subhdr=document.getElementById('vendor-subheader');
+  if(!currentVendor){
+    area.style.gridTemplateColumns='repeat(5,1fr)';
+    area.style.gridTemplateRows='repeat(2,1fr)';
+    area.style.alignContent='';
+    area.style.overflowY='hidden';
+    subhdr.style.display='none';
+    area.innerHTML=VENDORS.map(v=>{
+      const cartQty=v.skus.reduce((s,sk)=>s+(cart[sk.id]?.qty||0),0);
+      return `<div class="sku-btn${cartQty>0?' in-cart':''}" onclick="selectVendor(${v.id})" ontouchstart="event.preventDefault();selectVendor(${v.id})">
+        ${cartQty>0?`<div class="sku-qty-badge">${cartQty}</div>`:''}
+        <div class="sku-img-wrap"><span style="font-size:38px;line-height:1">${v.emoji}</span></div>
+        <div class="sku-name" style="font-size:12px;text-align:center;padding:0 4px;line-height:1.2">${v.name}</div>
+        <div class="sku-price">${v.skus.length} item${v.skus.length!==1?'s':''}</div>
+      </div>`;
+    }).join('');
+  } else {
+    const vendor=VENDORS.find(v=>v.id===currentVendor);
+    area.style.gridTemplateColumns='repeat(4,1fr)';
+    area.style.gridTemplateRows='';
+    area.style.alignContent='start';
+    area.style.overflowY='auto';
+    subhdr.style.display='flex';
+    document.getElementById('vendor-subname').textContent=vendor.name;
+    area.innerHTML=vendor.skus.map(s=>{
+      const qty=cart[s.id]?.qty||0;
+      return `<div class="sku-btn${qty>0?' in-cart':''}" onclick="addToCart(${s.id})" ontouchstart="event.preventDefault();addToCart(${s.id})">
+        ${qty>0?`<div class="sku-qty-badge">${qty}</div>`:''}
+        <div class="sku-img-wrap">${s.img?`<img class="sku-img" src="${s.img}" alt="${s.name}">`:`<span style="font-size:38px;line-height:1">${s.emoji}</span>`}</div>
+        <div class="sku-name">${s.name}</div>
+        <div class="sku-price">${fmt(s.price)}</div>
+      </div>`;
+    }).join('')+
+    `<div class="sku-btn sku-btn-custom" onclick="openCustomItem()">
+      <div class="sku-custom-icon">＋</div>
+      <div class="sku-name">Others</div>
+      <div class="sku-price">custom</div>
     </div>`;
-  }).join('')+
-  `<div class="sku-btn sku-btn-custom" onclick="openCustomItem()">
-    <div class="sku-custom-icon">＋</div>
-    <div class="sku-name">Others</div>
-    <div class="sku-price">custom</div>
-  </div>`;
+  }
 }
+function selectVendor(id){currentVendor=id;renderSKUs();}
+function backToVendors(){currentVendor=null;renderSKUs();}
 
 // ============ CUSTOM ITEM ============
 let customCounter=0;
@@ -827,7 +936,7 @@ function confirmCustomItem(){
 
 // ============ CART ============
 function addToCart(id){
-  const sku=SKUS.find(s=>s.id===id);
+  const sku=getSKUById(id);
   if(!cart[id]) cart[id]={sku,qty:0};
   cart[id].qty++;renderAll();
 }
@@ -856,7 +965,7 @@ function renderOrderPanel(){
   } else {
     el.innerHTML=items.map(({sku,qty})=>`
       <div class="order-item">
-        <div class="order-item-name">${sku.name}</div>
+        <div class="order-item-name">${sku.name}<div class="order-item-vendor">${sku.vendor||''}</div></div>
         <div class="qty-ctrl">
           <button class="qty-btn" onclick="changeQty(${sku.id},-1)">−</button>
           <span class="qty-num">${qty}</span>
@@ -1045,7 +1154,7 @@ function endTransaction(payments,sundry){
     time:now.toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit',second:'2-digit'}),
     hour:now.getHours(),
     outlet:currentOutlet,
-    items:Object.values(cart).map(({sku,qty})=>({name:sku.name,qty,price:sku.price,sub:sku.price*qty})),
+    items:Object.values(cart).map(({sku,qty})=>({id:sku.id,name:sku.name,vendor:sku.vendor||'',qty,price:sku.price,sub:sku.price*qty})),
     subtotal:getSubtotal(),
     discount:getDiscountAmt(),
     total:Math.round((getTotal()+sundryAmt)*100)/100,
@@ -1125,7 +1234,7 @@ function reprintLast(){
 
 // ============ REPORTS ============
 function buildReportData(){
-  const skuQty={};SKUS.forEach(s=>skuQty[s.name]=0);
+  const skuQty={};VENDORS.forEach(v=>v.skus.forEach(s=>skuQty[s.id]=0));
   const payTotals={card:0,paynow:0,voucher:0,sundry:0};
   const payCount={card:0,paynow:0,voucher:0,sundry:0};
   let grossRev=0,discountTotal=0;
@@ -1135,13 +1244,13 @@ function buildReportData(){
   transactions.forEach(t=>{
     grossRev+=t.subtotal;
     discountTotal+=t.discount;
-    t.items.forEach(i=>{if(skuQty[i.name]!==undefined)skuQty[i.name]+=i.qty;});
+    t.items.forEach(i=>{if(i.id&&skuQty[i.id]!==undefined)skuQty[i.id]+=i.qty;});
     t.payments.forEach(p=>{payTotals[p.type]=(payTotals[p.type]||0)+p.amount;payCount[p.type]=(payCount[p.type]||0)+1;});
     const h=t.hour;
     hourlyRev[h]=(hourlyRev[h]||0)+t.total;
     hourlyCount[h]=(hourlyCount[h]||0)+1;
   });
-  return{outlet:currentOutlet,skuQty,payTotals,payCount,grossRev,discountTotal,netRev:grossRev-discountTotal,hourlyRev,hourlyCount,txnCount:transactions.length};
+  return{outlet:'Hypha Vending',skuQty,payTotals,payCount,grossRev,discountTotal,netRev:grossRev-discountTotal,hourlyRev,hourlyCount,txnCount:transactions.length};
 }
 function openXReport(){
   const now=new Date();
