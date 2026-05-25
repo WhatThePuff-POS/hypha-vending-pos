@@ -681,31 +681,39 @@ let currentVendor=null;
 let currentOutlet='Hypha Vending';
 // ============ SESSION PERSISTENCE (crash recovery) ============
 function _todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function _lsAvailable(){try{localStorage.setItem('__t','1');localStorage.removeItem('__t');return true;}catch(e){return false;}}
 function saveToSession(txn){
-  const key='hv_session';
-  const s=JSON.parse(localStorage.getItem(key)||'{"date":"","txns":[]}');
-  if(s.date!==_todayStr()){s.date=_todayStr();s.txns=[];}
-  // update existing or append
-  const idx=s.txns.findIndex(t=>t.id===txn.id);
-  if(idx>=0) s.txns[idx]=txn; else s.txns.push(txn);
-  localStorage.setItem(key,JSON.stringify(s));
+  if(!_lsAvailable()){showToast('⚠️','Private Browsing detected — transactions will not persist');return;}
+  try{
+    const raw=localStorage.getItem('hv_session');
+    const s=raw?JSON.parse(raw):[];
+    const arr=Array.isArray(s)?s:(s.txns||[]);
+    const idx=arr.findIndex(t=>t.id===txn.id);
+    if(idx>=0) arr[idx]=txn; else arr.push(txn);
+    localStorage.setItem('hv_session',JSON.stringify(arr));
+  }catch(e){showToast('⚠️','Could not save transaction locally');}
 }
 function restoreFromSession(){
-  const key='hv_session';
-  const s=JSON.parse(localStorage.getItem(key)||'{"date":"","txns":[]}');
-  if(s.date!==_todayStr()||!s.txns.length) return false;
-  transactions=s.txns;
-  transactions.forEach(t=>{
-    const m=(t.txnId||t.id||'').match(/TXN(\d+)/);
-    if(m) txnCounter=Math.max(txnCounter,parseInt(m[1]));
-  });
-  updateTopbarStats();
-  showToast('🔄','Restored '+transactions.length+' transaction(s) from today');
-  return true;
+  if(!_lsAvailable()) return false;
+  try{
+    const raw=localStorage.getItem('hv_session');
+    if(!raw) return false;
+    const parsed=JSON.parse(raw);
+    // support both old {date,txns:[]} format and new flat-array format
+    const arr=Array.isArray(parsed)?parsed:(parsed.txns||[]);
+    if(!arr.length) return false;
+    transactions=arr;
+    transactions.forEach(t=>{
+      const m=(t.txnId||t.id||'').match(/TXN(\d+)/);
+      if(m) txnCounter=Math.max(txnCounter,parseInt(m[1]));
+    });
+    updateTopbarStats();
+    showToast('🔄','Restored '+transactions.length+' transaction(s)');
+    return true;
+  }catch(e){return false;}
 }
 function clearSession(){
-  localStorage.removeItem('hv_session');
-  localStorage.removeItem('hv_txns');
+  try{localStorage.removeItem('hv_session');localStorage.removeItem('hv_txns');}catch(e){}
 }
 let adminCallback=null;
 let adminMode='report';

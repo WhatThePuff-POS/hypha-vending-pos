@@ -1,4 +1,4 @@
-const CACHE = 'hv-v1';
+const CACHE = 'hv-v2';
 const SHELL = ['index.html', 'dashboard.html', 'logo.png'];
 
 self.addEventListener('install', e => {
