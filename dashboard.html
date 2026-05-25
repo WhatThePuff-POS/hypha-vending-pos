@@ -1,25 +1,25 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>What The Puff — Live Dashboard</title>
+<title>Hypha Vending — Live Dashboard</title>
 <meta name="theme-color" content="#111">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="WTP Dashboard">
+<meta name="apple-mobile-web-app-title" content="HV Dashboard">
 <link rel="manifest" href="manifest.json">
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getFirestore, collection, query, orderBy, where, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   const cfg = {
-    apiKey:"AIzaSyAPCeTkc3cTqRNIDRhKQcpjrsUcckIUg68",
-    authDomain:"whatthepuff-be1ce.firebaseapp.com",
-    projectId:"whatthepuff-be1ce",
-    storageBucket:"whatthepuff-be1ce.firebasestorage.app",
-    messagingSenderId:"743661932433",
-    appId:"1:743661932433:web:1d510f245d2c513df21430"
+    apiKey:"REPLACE_WITH_HV_API_KEY",
+    authDomain:"REPLACE_WITH_HV_PROJECT_ID.firebaseapp.com",
+    projectId:"REPLACE_WITH_HV_PROJECT_ID",
+    storageBucket:"REPLACE_WITH_HV_PROJECT_ID.firebasestorage.app",
+    messagingSenderId:"REPLACE_WITH_HV_SENDER_ID",
+    appId:"REPLACE_WITH_HV_APP_ID"
   };
   const app = initializeApp(cfg);
   const db = getFirestore(app);
@@ -70,7 +70,7 @@
 
     const SKU_NAMES = ["Original","Sardine","Cheesy","Black Pepper","Char Siew","Otah"];
     const skuQty = {}; SKU_NAMES.forEach(s=>skuQty[s]=0);
-    const payTotals = {cash:0,paynow:0,cdc:0,voucher:0,sundry:0};
+    const payTotals = {card:0,paynow:0,voucher:0,sundry:0};
     let totalItems = 0;
     // Hourly — use integer hour
     const hourlyRev = {};
@@ -98,7 +98,7 @@
     document.getElementById('stat-items').textContent = totalItems;
 
     // Outlet bars
-    const outlets = ['Bedok 216','Haig Road','Punggol Coast'];
+    const outlets = ['Hypha Vending'];
     const totalOutletRev = Object.values(outletRevenue).reduce((s,v)=>s+v,0)||1;
     document.getElementById('outlet-breakdown').innerHTML = outlets.map(o => {
       const rev = outletRevenue[o]||0;
@@ -114,7 +114,7 @@
     ).join('');
 
     // Payment bars
-    const payLabels={cash:'💵 Cash',paynow:'📱 PayNow',cdc:'🏠 CDC',voucher:'🎟️ Voucher',sundry:'⚡ Sundry'};
+    const payLabels={card:'💳 Card',paynow:'📱 PayNow',voucher:'🎟️ Voucher',sundry:'⚡ Sundry'};
     const totalPay=Object.values(payTotals).reduce((s,v)=>s+v,0)||1;
     document.getElementById('pay-breakdown').innerHTML = Object.entries(payTotals).map(([type,amt])=>`
       <div class="br-row"><span class="br-name">${payLabels[type]}</span><div class="bar-wrap"><div class="bar-fill green" style="width:${Math.round(amt/totalPay*100)}%"></div></div><span class="br-val">$${amt.toFixed(2)}</span></div>`
@@ -307,7 +307,7 @@ tr:last-child td{border-bottom:none}
 
 <!-- DASHBOARD PIN GATE -->
 <div class="dash-gate" id="dash-gate">
-  <div class="dash-gate-brand">What The Puff</div>
+  <div class="dash-gate-brand">Hypha Vending</div>
   <div class="dash-gate-sub">Enter PIN to view dashboard</div>
   <div class="dash-pin-dots">
     <div class="dash-pin-dot" id="dpd0"></div>
@@ -333,7 +333,7 @@ tr:last-child td{border-bottom:none}
 </div>
 
 <div class="topbar">
-  <span class="topbar-brand">What The Puff</span>
+  <span class="topbar-brand">Hypha Vending</span>
   <div class="live-badge"><div class="live-dot" id="live-dot"></div>Live</div>
   <span class="topbar-spacer"></span>
   <span class="topbar-time" id="dash-clock"></span>
@@ -341,9 +341,7 @@ tr:last-child td{border-bottom:none}
 
 <div class="filters">
   <span class="filter-label">Outlet:</span>
-  <select class="filter-select" id="outlet-filter" onchange="refreshDashboard()">
-    <option>All</option><option>Bedok 216</option><option>Haig Road</option><option>Punggol Coast</option>
-  </select>
+  <select class="filter-select" id="outlet-filter" onchange="refreshDashboard()"><option>All</option><option>Hypha Vending</option></select>
   <span class="filter-label">Date:</span>
   <input class="filter-input" type="date" id="date-filter" onchange="refreshDashboard()">
   <button class="filter-btn" onclick="document.getElementById('date-filter').value='';refreshDashboard()">Today</button>

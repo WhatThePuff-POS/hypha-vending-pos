@@ -1,4 +1,4 @@
-const CACHE = 'wtp-v15';
+const CACHE = 'hv-v1';
 const SHELL = ['index.html', 'dashboard.html', 'logo.png'];
 
 self.addEventListener('install', e => {

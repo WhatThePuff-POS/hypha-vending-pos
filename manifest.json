@@ -1,7 +1,7 @@
 {
-  "name": "What The Puff POS",
-  "short_name": "WTP POS",
-  "description": "Point of Sale system for What The Puff",
+  "name": "Hypha Vending POS",
+  "short_name": "HV POS",
+  "description": "Point of Sale system for Hypha Vending",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#1a1a1a",
