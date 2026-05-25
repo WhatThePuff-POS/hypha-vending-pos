@@ -680,7 +680,7 @@ let currentVendor=null;
 
 let currentOutlet='Hypha Vending';
 // ============ SESSION PERSISTENCE (crash recovery) ============
-function _todayStr(){return new Date().toLocaleDateString('en-SG',{day:'2-digit',month:'short',year:'numeric'});}
+function _todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function saveToSession(txn){
   const key='hv_session';
   const s=JSON.parse(localStorage.getItem(key)||'{"date":"","txns":[]}');
