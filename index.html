@@ -185,8 +185,8 @@ html,body{height:100%;background:#1a1a1a;font-family:'Segoe UI',system-ui,sans-s
 }
 .order-header-title{font-size:14px;font-weight:500;color:var(--text2);flex:1}
 .order-header-btns{display:flex;gap:8px;align-items:center}
-.reprint-btn{font-size:12px;color:var(--text3);cursor:pointer;padding:3px 8px;border-radius:4px;border:1px solid var(--border)}
-.reprint-btn:hover{color:var(--amber);border-color:var(--amber-dim)}
+
+
 .clear-btn{font-size:13px;color:var(--text3);cursor:pointer;padding:3px 8px;border-radius:4px}
 .clear-btn:hover{color:var(--red);background:var(--red-bg)}
 .order-items{flex:1;overflow-y:auto;padding:10px}
@@ -273,6 +273,7 @@ html,body{height:100%;background:#1a1a1a;font-family:'Segoe UI',system-ui,sans-s
 .report-row .rv{font-family:monospace;color:var(--text);font-weight:500}
 .report-row.highlight .rl{color:var(--amber-light);font-weight:600}
 .report-row.highlight .rv{color:var(--amber);font-size:14px}
+.report-vendor-hdr{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin:10px 0 3px;padding-bottom:3px;border-bottom:1px solid var(--border)}
 .hourly-chart{display:flex;align-items:flex-end;gap:2px;height:70px;padding:4px 0}
 .hour-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;height:100%;justify-content:flex-end}
 .hour-bar{width:100%;background:var(--amber-dim);border-radius:2px 2px 0 0;min-height:2px}
@@ -351,21 +352,6 @@ html,body{height:100%;background:#1a1a1a;font-family:'Segoe UI',system-ui,sans-s
   .pin-btn{height:56px;font-size:20px}
   .admin-btn{height:52px;font-size:19px}
 }
-
-/* ---- PRINT / RECEIPT ---- */
-#receipt-print{display:none}
-@page{margin:0}
-@media print{
-  body>*{display:none!important}
-  #receipt-print{
-    display:block!important;
-    font-family:'Courier New',Courier,monospace;
-    font-size:10pt;
-    color:#000;
-    width:76mm;
-    padding:8mm 5mm 12mm;
-    line-height:1.45;
-  }
   .rp-head{text-align:center;padding-bottom:3mm}
   .rp-logo{width:62mm;max-width:100%;display:block;margin:0 auto}
   .rp-sep{border:none;border-top:1.5px solid #000;margin:3mm 0}
@@ -406,8 +392,8 @@ html,body{height:100%;background:#1a1a1a;font-family:'Segoe UI',system-ui,sans-s
 .oc-label{font-size:13px;color:var(--text2)}
 .oc-txnid{font-size:36px;font-weight:700;color:var(--amber);font-family:monospace;letter-spacing:2px}
 .oc-total{font-size:16px;color:var(--text);font-family:monospace}
-.oc-print-btn{padding:10px 22px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text2);font-size:13px;cursor:pointer;transition:all 0.1s}
-.oc-print-btn:hover{border-color:var(--amber-dim);color:var(--amber)}
+
+
 </style>
 </head>
 <body>
@@ -499,7 +485,7 @@ html,body{height:100%;background:#1a1a1a;font-family:'Segoe UI',system-ui,sans-s
     <div class="order-header">
       <span class="order-header-title">Current order</span>
       <div class="order-header-btns">
-        <span class="reprint-btn" onclick="reprintLast()">🖨 Reprint</span>
+
         <span class="clear-btn" onclick="clearCart()">Clear</span>
       </div>
     </div>
@@ -527,30 +513,15 @@ html,body{height:100%;background:#1a1a1a;font-family:'Segoe UI',system-ui,sans-s
 <!-- PAYMENT MODAL -->
 <div class="modal-overlay" id="payment-modal">
   <div class="modal">
-    <div class="modal-title">Make Payment</div>
-    <div class="modal-sub" id="pay-modal-sub">Select payment method</div>
+    <div class="modal-title">Card Payment</div>
+    <div class="modal-sub">Present card to terminal</div>
     <div class="modal-total">
       <span class="lbl">Amount Due</span>
       <span class="amt" id="pay-modal-amount">$0.00</span>
     </div>
-    <div class="split-summary" id="split-summary" style="display:none"></div>
-    <div class="pay-methods">
-      <button class="pay-method-btn" id="pm-card" onclick="selectPayMethod('card')"><span class="pm-icon">💳</span><span>Card</span><span style="font-size:10px;color:var(--text3)">VISA / Master</span></button>
-      <button class="pay-method-btn" id="pm-paynow" onclick="selectPayMethod('paynow')"><span class="pm-icon">📱</span><span>PayNow</span></button>
-      <button class="pay-method-btn" id="pm-voucher" onclick="selectPayMethod('voucher')"><span class="pm-icon">🎟️</span><span>Voucher</span></button>
-    </div>
-
-
-    <div class="split-ui" id="voucher-ui" style="display:none">
-      <div class="split-input-row">
-        <span class="split-input-label">Voucher Amount ($)</span>
-        <input class="split-input" type="number" id="voucher-amount-input" min="0" step="0.50" placeholder="0.00" oninput="updateSplitRemain('voucher')">
-      </div>
-      <div class="split-remain" id="voucher-remain" style="display:none"><span>Remaining</span><span class="amt" id="voucher-remain-amt">$0.00</span></div>
-    </div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closePayment()">Cancel</button>
-      <button class="btn-primary" id="pay-confirm-btn" onclick="confirmPayment()" disabled>Confirm & End Transaction</button>
+      <button class="btn-primary" onclick="confirmPayment()">✓ Confirm Payment</button>
     </div>
   </div>
 </div>
@@ -564,12 +535,11 @@ html,body{height:100%;background:#1a1a1a;font-family:'Segoe UI',system-ui,sans-s
 <div class="terminal-closed" id="terminal-closed">
   <div style="font-size:56px;opacity:0.3">🔒</div>
   <div style="font-size:22px;font-weight:500;color:var(--text2)">Terminal Closed</div>
-  <div style="font-size:13px;color:var(--text3)">Z-Report printed. Have a good rest!</div>
+  <div style="font-size:13px;color:var(--text3)">Z-Report complete. Have a good rest!</div>
   <button class="tc-reopen" onclick="reopenTerminal()">Open New Day</button>
 </div>
 
-<!-- RECEIPT (print-only, hidden on screen) -->
-<div id="receipt-print"></div>
+
 
 <!-- ORDER COMPLETE -->
 <div class="order-complete" id="order-complete" onclick="this.classList.remove('open')">
@@ -578,7 +548,7 @@ html,body{height:100%;background:#1a1a1a;font-family:'Segoe UI',system-ui,sans-s
     <div class="oc-label">Order</div>
     <div class="oc-txnid" id="oc-txnid">—</div>
     <div class="oc-total" id="oc-total"></div>
-    <button class="oc-print-btn" onclick="event.stopPropagation();printReceipt(lastReceipt)">🖨️ Print Receipt</button>
+
     <div style="font-size:11px;color:var(--text3)">Tap anywhere to dismiss</div>
   </div>
 </div>
@@ -618,8 +588,8 @@ html,body{height:100%;background:#1a1a1a;font-family:'Segoe UI',system-ui,sans-s
 
 <script>
 // ============ CONSTANTS ============
-const OPEN_PIN_ENC  = btoa('4321');   // '1234' reversed
-const ADMIN_PIN_ENC = btoa('9999');   // '9999' reversed
+const OPEN_PIN_ENC  = btoa('0000');   // '0000' reversed
+const ADMIN_PIN_ENC = btoa('1010');   // '0101' reversed
 function pinValid(input, enc){ return btoa(input.split('').reverse().join(''))===enc; }
 const VENDORS = [
   {id:1, name:'Panna Cotta by Rohmini', emoji:'🍮', skus:[
@@ -705,9 +675,9 @@ function getSKUById(id){for(const v of VENDORS){const s=v.skus.find(s=>s.id===id
 
 // ============ STATE ============
 let cart={}, seniorDiscount=false, transactions=[], txnCounter=0;
-let splitPayments=[], remainingDue=0, selectedPayMethod=null, cashGiven=null;
+let splitPayments=[], remainingDue=0;
 let currentVendor=null;
-let lastReceipt=null;
+
 let currentOutlet='Hypha Vending';
 let adminCallback=null;
 let adminMode='report';
@@ -879,7 +849,7 @@ function renderSKUs(){
       return `<div class="sku-btn${cartQty>0?' in-cart':''}" onclick="selectVendor(${v.id})" ontouchstart="event.preventDefault();selectVendor(${v.id})">
         ${cartQty>0?`<div class="sku-qty-badge">${cartQty}</div>`:''}
         <div class="sku-img-wrap"><span style="font-size:38px;line-height:1">${v.emoji}</span></div>
-        <div class="sku-name" style="font-size:12px;text-align:center;padding:0 4px;line-height:1.2">${v.name}</div>
+        <div class="sku-name" style="text-align:center;padding:0 6px;line-height:1.3">${v.name}</div>
         <div class="sku-price">${v.skus.length} item${v.skus.length!==1?'s':''}</div>
       </div>`;
     }).join('');
@@ -1002,144 +972,16 @@ function removeDiscount(){
 function openPayment(){
   if(!Object.keys(cart).length) return;
   splitPayments=[];remainingDue=getTotal();
-  resetPayModal();
+  document.getElementById('pay-modal-amount').textContent=fmt(remainingDue);
+  document.getElementById('pay-modal-sub') && (document.getElementById('pay-modal-sub').textContent='Present card to terminal');
   document.getElementById('payment-modal').classList.add('open');
 }
 function closePayment(){
   document.getElementById('payment-modal').classList.remove('open');
-  selectedPayMethod=null;cashGiven=null;
-}
-function resetPayModal(){
-  selectedPayMethod=null;cashGiven=null;
-  document.getElementById('pay-modal-amount').textContent=fmt(remainingDue);
-  document.getElementById('pay-modal-sub').textContent='Select payment method';
-  updateSplitSummary();
-  ['card','paynow','voucher'].forEach(m=>document.getElementById('pm-'+m).classList.remove('selected'));
-  ['voucher-ui'].forEach(id=>document.getElementById(id).style.display='none');
-
-
-
-
-
-  document.getElementById('pay-confirm-btn').disabled=true;
-  document.getElementById('pay-confirm-btn').textContent='Confirm & End Transaction';
-}
-function updateSplitSummary(){
-  const el=document.getElementById('split-summary');
-  if(!splitPayments.length){el.style.display='none';return;}
-  el.style.display='block';
-  el.innerHTML=splitPayments.map(p=>`<strong>${p.type.toUpperCase()}</strong>: ${fmt(p.amount)}`).join(' + ')+` → Remaining: <strong>${fmt(remainingDue)}</strong>`;
-}
-function selectPayMethod(method){
-  selectedPayMethod=method;
-  ['card','paynow','voucher'].forEach(m=>document.getElementById('pm-'+m).classList.remove('selected'));
-  document.getElementById('pm-'+method).classList.add('selected');
-  ['voucher-ui'].forEach(id=>document.getElementById(id).style.display='none');
-  document.getElementById('pay-confirm-btn').disabled=true;
-  if(method==='card'){document.getElementById('pay-confirm-btn').disabled=false;}
-  else if(method==='paynow'){document.getElementById('pay-confirm-btn').disabled=false;}
-
-  else if(method==='voucher'){document.getElementById('voucher-ui').style.display='block';}
-}
-function buildCashPresets(){
-  const due=remainingDue;
-  const btns=[{label:'Exact '+fmt(due),val:due}];
-  // Next whole dollar if amount has cents
-  const nextDollar=Math.ceil(due);
-  if(nextDollar>due) btns.push({label:'$'+nextDollar,val:nextDollar});
-  // Common Singapore note denominations above the amount
-  [10,20,50,100].forEach(v=>{if(v>due) btns.push({label:'$'+v,val:v});});
-  document.getElementById('cash-presets').innerHTML=
-    btns.map(b=>`<button class="cash-preset-btn" onclick="setCash(${b.val})">${b.label}</button>`).join('')+
-    `<div style="display:flex;align-items:center;gap:6px;flex-basis:100%;margin-top:4px">
-      <span style="font-size:12px;color:var(--text2);white-space:nowrap">Custom $</span>
-      <input id="cash-custom-input" type="number" min="0" step="0.10"
-        style="flex:1;padding:9px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-size:15px;font-family:monospace;outline:none;width:100%"
-        placeholder="${due.toFixed(2)}"
-        oninput="setCustomCash(this.value)"
-        onfocus="this.style.borderColor='var(--amber)'"
-        onblur="this.style.borderColor='var(--border2)'">
-    </div>`;
-}
-function setCash(amount){
-  cashGiven=amount;
-  document.querySelectorAll('.cash-preset-btn').forEach(b=>b.classList.remove('selected'));
-  event.target.classList.add('selected');
-  const inp=document.getElementById('cash-custom-input');
-  if(inp) inp.value='';
-  const change=amount-remainingDue;
-  document.getElementById('change-display').style.display='flex';
-  document.getElementById('change-amount').textContent=fmt(Math.max(0,change));
-  document.getElementById('pay-confirm-btn').disabled=false;
-  openCashDrawer();
-}
-function setCustomCash(val){
-  const amount=parseFloat(val);
-  document.querySelectorAll('.cash-preset-btn').forEach(b=>b.classList.remove('selected'));
-  if(isNaN(amount)||amount<=0){
-    cashGiven=null;
-  
-    document.getElementById('pay-confirm-btn').disabled=true;
-    return;
-  }
-  cashGiven=amount;
-  const change=amount-remainingDue;
-  document.getElementById('change-display').style.display='flex';
-  document.getElementById('change-amount').textContent=change>=0?fmt(change):'—';
-  document.getElementById('pay-confirm-btn').disabled=amount<remainingDue;
-}
-function openCashDrawer(){
-  // Cash drawer opens via ESC/POS command through the receipt printer
-  // When printer is connected, this will fire automatically via print trigger
-  // For WebUSB/WebBluetooth printers: implement ESC p 0 command here
-  console.log('Cash drawer trigger: ESC p 0 48 255 255');
-  // Placeholder for when printer is set up:
-  // window.triggerCashDrawer && window.triggerCashDrawer();
-}
-function updateSplitRemain(type){
-  const val=parseFloat(document.getElementById(type+'-amount-input').value)||0;
-  const remEl=document.getElementById(type+'-remain');
-  const btn=document.getElementById('pay-confirm-btn');
-  if(val<=0){remEl.style.display='none';btn.disabled=true;return;}
-  if(type==='cdc'&&val>remainingDue){
-    const sundry=Math.round((val-remainingDue)*100)/100;
-    remEl.style.display='flex';
-    document.getElementById('cdc-remain-lbl').textContent='Sundry';
-    document.getElementById('cdc-remain-amt').textContent=fmt(sundry);
-    btn.disabled=false;
-    btn.textContent='Confirm & End Transaction (Sundry +'+fmt(sundry)+')';
-  } else {
-    const remain=remainingDue-val;
-    remEl.style.display='flex';
-    if(type==='cdc') document.getElementById('cdc-remain-lbl').textContent='Remaining';
-    document.getElementById(type+'-remain-amt').textContent=fmt(Math.max(0,remain));
-    btn.disabled=false;
-    btn.textContent=remain<=0.001?'Confirm & End Transaction':'Apply '+type.toUpperCase()+' → Select remaining';
-  }
 }
 function confirmPayment(){
-  const method=selectedPayMethod;
-  if(method==='voucher'){
-    const val=parseFloat(document.getElementById(method+'-amount-input').value)||0;
-    if(val<=0) return;
-    if(false){
-      const sundry=Math.round((val-remainingDue)*100)/100;
-      splitPayments.push({type:'cdc',amount:remainingDue});
-      splitPayments.push({type:'sundry',amount:sundry});
-      endTransaction(splitPayments,sundry);
-      return;
-    }
-    splitPayments.push({type:method,amount:Math.min(val,remainingDue)});
-    remainingDue=Math.max(0,remainingDue-val);
-    if(remainingDue<=0.001){endTransaction(splitPayments);}
-    else{resetPayModal();updateSplitSummary();}
-    return;
-  }
-
-  if(method==='card'||method==='paynow'){
-    splitPayments.push({type:method,amount:remainingDue});
-    endTransaction(splitPayments);return;
-  }
+  splitPayments=[{type:'card',amount:getTotal()}];
+  endTransaction(splitPayments);
 }
 
 // ============ TRANSACTION ============
@@ -1164,7 +1006,7 @@ function endTransaction(payments,sundry){
     timestamp:now.toISOString()
   };
   transactions.push(txn);
-  lastReceipt=txn;
+  
   saveToCloud(txn);
   closePayment();
   clearCart();
@@ -1177,66 +1019,11 @@ function endTransaction(payments,sundry){
 }
 
 // ============ RECEIPT ============
-function buildReceiptHTML(txn){
-  const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
-  const itemRows=(txn.items||[]).map(i=>
-    `<tr><td class="rp-q">${i.qty}x</td><td class="rp-n">${i.name}</td><td class="rp-r">${fmt(i.sub)}</td></tr>`
-  ).join('');
-  const discRow=txn.discount>0
-    ?`<tr class="rp-disc"><td></td><td>Senior Disc (10%)</td><td class="rp-r">-${fmt(txn.discount)}</td></tr>`:'';
-  const payRows=(txn.payments||[]).map(p=>
-    `<tr class="rp-pay"><td colspan="2">${cap(p.type)}</td><td class="rp-r">${fmt(p.amount)}</td></tr>`
-  ).join('');
-  return `
-    <div class="rp-head">
-      <img src="logo.png" class="rp-logo" alt="Hypha Vending">
-    </div>
-    <hr class="rp-sep">
-    <div class="rp-meta">
-      ${txn.outlet}<br>
-      ${txn.date} &nbsp; ${txn.time}<br>
-      Receipt: <strong>${txn.id}</strong>
-    </div>
-    <hr class="rp-dash">
-    <table class="rp-tbl">${itemRows}</table>
-    <hr class="rp-dash">
-    <table class="rp-tbl">
-      <tr class="rp-sub-lbl"><td colspan="2">Subtotal</td><td class="rp-r">${fmt(txn.subtotal)}</td></tr>
-      ${discRow}
-    </table>
-    <hr class="rp-sep">
-    <table class="rp-tbl"><tr class="rp-tot"><td colspan="2">TOTAL</td><td class="rp-r">${fmt(txn.total)}</td></tr></table>
-    <hr class="rp-sep">
-    <table class="rp-tbl">${payRows}</table>
-    <hr class="rp-dash">
-    <div class="rp-foot">
-      Thank you for your support!<br>
-      See you again soon ☕
-      <div class="rp-ref">${txn.id} &nbsp;·&nbsp; ${txn.date}</div>
-    </div>`;
-}
-function printReceipt(txn){
-  document.getElementById('receipt-print').innerHTML=buildReceiptHTML(txn);
-  const img=document.querySelector('#receipt-print .rp-logo');
-  if(img && !img.complete){
-    img.onload=()=>window.print();
-    img.onerror=()=>window.print();
-  } else {
-    window.print();
-  }
-}
-
-// ============ REPRINT ============
-function reprintLast(){
-  if(!lastReceipt){showToast('⚠️','No previous receipt');return;}
-  printReceipt(lastReceipt);
-}
-
 // ============ REPORTS ============
 function buildReportData(){
   const skuQty={};VENDORS.forEach(v=>v.skus.forEach(s=>skuQty[s.id]=0));
-  const payTotals={card:0,paynow:0,voucher:0,sundry:0};
-  const payCount={card:0,paynow:0,voucher:0,sundry:0};
+  const payTotals={card:0,sundry:0};
+  const payCount={card:0,sundry:0};
   let grossRev=0,discountTotal=0;
   // Hourly: store revenue AND count by hour
   const hourlyRev={};
@@ -1277,11 +1064,11 @@ function closeReport(isZ){
     setTimeout(()=>document.getElementById('terminal-closed').classList.add('open'),400);
   }
 }
-function printReport(type){showToast('🖨️',type+'-Report sent to printer');}
+
 function buildReportHTML(type,now,isZ,d){
   const dtStr=now.toLocaleDateString('en-SG',{day:'2-digit',month:'short',year:'numeric'})+' '+now.toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  const skuRows=SKUS.map(s=>`<div class="report-row"><span class="rl">${s.name}</span><span class="rv">${d.skuQty[s.name]||0} pcs · ${fmt((d.skuQty[s.name]||0)*s.price)}</span></div>`).join('');
-  const payRows=['card','paynow','voucher','sundry'].filter(p=>p!=='sundry'||(d.payTotals.sundry||0)>0).map(p=>`<div class="report-row"><span class="rl">${p.charAt(0).toUpperCase()+p.slice(1)}</span><span class="rv">${fmt(d.payTotals[p]||0)} (${d.payCount[p]||0})</span></div>`).join('');
+  const skuRows=VENDORS.map(v=>'<div class="report-vendor-hdr">'+v.name+'</div>'+v.skus.map(s=>'<div class="report-row"><span class="rl">'+s.name+'</span><span class="rv">'+(d.skuQty[s.id]||0)+' pcs · '+fmt((d.skuQty[s.id]||0)*s.price)+'</span></div>').join('')).join('');
+  const payRows=['card','sundry'].filter(p=>p!=='sundry'||(d.payTotals.sundry||0)>0).map(p=>'<div class="report-row"><span class="rl">'+p.charAt(0).toUpperCase()+p.slice(1)+'</span><span class="rv">'+fmt(d.payTotals[p]||0)+' ('+( d.payCount[p]||0)+')</span></div>').join('');
   // Hourly bars: fix — use actual hour integers
   const hours=[];for(let h=8;h<=21;h++) hours.push(h);
   const hourVals=hours.map(h=>d.hourlyRev[h]||0);
@@ -1313,7 +1100,6 @@ function buildReportHTML(type,now,isZ,d){
     <div class="report-section"><div class="report-section-title">Hourly Sales</div>${hourlyBars}</div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeReport(${isZ})">Close</button>
-      <button class="btn-primary" onclick="printReport('${type}');closeReport(${isZ})">🖨️ Print ${type}-Report</button>
     </div>`;
 }
 function reopenTerminal(){
